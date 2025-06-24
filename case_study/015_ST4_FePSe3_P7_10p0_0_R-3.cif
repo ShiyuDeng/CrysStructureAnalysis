@@ -1,0 +1,729 @@
+data_015_st4_fepse3_p7_10p0_0
+_audit_creation_date               2025-04-16
+_audit_creation_method
+;
+Olex2 1.5
+(compiled 2025.03.04 svn.red2d20d0 for OlexSys, GUI svn.r7188)
+;
+_shelx_SHELXL_version_number       '2018/3'
+_audit_contact_author_address      ?
+_audit_contact_author_email        ?
+_audit_contact_author_name         ''
+_audit_contact_author_phone        ?
+_publ_contact_author_id_orcid      ?
+_publ_section_references
+;
+Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
+ (2009), J. Appl. Cryst. 42, 339-341.
+
+Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122.
+
+Sheldrick, G.M. (2015). Acta Cryst. C71, 3-8.
+;
+_chemical_name_common              ?
+_chemical_name_systematic          ?
+_chemical_formula_moiety           'Fe2 P2 Se6'
+_chemical_formula_sum              'Fe P Se3'
+_chemical_formula_weight           323.70
+_chemical_melting_point            ?
+_chemical_oxdiff_formula           FePSe3
+loop_
+  _atom_type_symbol
+  _atom_type_description
+  _atom_type_scat_dispersion_real
+  _atom_type_scat_dispersion_imag
+  _atom_type_scat_source
+ 'P' 'P' 0.0517 0.0444 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+ 'Fe' 'Fe' 0.2486 0.4181 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+ 'Se' 'Se' 0.2928 1.1575 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+
+_shelx_space_group_comment
+;
+The symmetry employed for this shelxl refinement is uniquely defined
+by the following loop, which should always be used as a source of
+symmetry information in preference to the above space-group names.
+They are only intended as comments.
+;
+_space_group_crystal_system        'trigonal'
+_space_group_IT_number             148
+_space_group_name_H-M_alt          'R -3'
+_space_group_name_Hall             '-R 3'
+loop_
+  _space_group_symop_operation_xyz
+ 'x, y, z'
+ '-y, x-y, z'
+ '-x+y, -x, z'
+ 'x+2/3, y+1/3, z+1/3'
+ '-y+2/3, x-y+1/3, z+1/3'
+ '-x+y+2/3, -x+1/3, z+1/3'
+ 'x+1/3, y+2/3, z+2/3'
+ '-y+1/3, x-y+2/3, z+2/3'
+ '-x+y+1/3, -x+2/3, z+2/3'
+ '-x, -y, -z'
+ 'y, -x+y, -z'
+ 'x-y, x, -z'
+ '-x+2/3, -y+1/3, -z+1/3'
+ 'y+2/3, -x+y+1/3, -z+1/3'
+ 'x-y+2/3, x+1/3, -z+1/3'
+ '-x+1/3, -y+2/3, -z+2/3'
+ 'y+1/3, -x+y+2/3, -z+2/3'
+ 'x-y+1/3, x+2/3, -z+2/3'
+
+_cell_length_a                     6.0195(16)
+_cell_length_b                     6.0195(16)
+_cell_length_c                     15.46(14)
+_cell_angle_alpha                  90
+_cell_angle_beta                   90
+_cell_angle_gamma                  120
+_cell_volume                       485(4)
+_cell_formula_units_Z              3
+_cell_measurement_reflns_used      350
+_cell_measurement_temperature      293(2)
+_cell_measurement_theta_max        22.1390
+_cell_measurement_theta_min        2.8270
+_shelx_estimated_absorpt_T_max     0.875
+_shelx_estimated_absorpt_T_min     0.389
+_exptl_absorpt_coefficient_mu      6.854
+_exptl_absorpt_correction_T_max    0.829
+_exptl_absorpt_correction_T_min    0.816
+_exptl_absorpt_correction_type     analytical
+_exptl_absorpt_process_details
+;
+CrysAlisPro 1.171.42.90a (Rigaku Oxford Diffraction, 2023)
+Analytical numeric absorption correction using a multifaceted crystal
+model based on expressions derived by R.C. Clark & J.S. Reid.
+(Clark, R. C. & Reid, J. S. (1995). Acta Cryst. A51, 887-897)
+Empirical absorption correction using spherical harmonics,
+implemented in SCALE3 ABSPACK scaling algorithm.
+;
+_exptl_absorpt_special_details     ?
+_exptl_crystal_colour              ?
+_exptl_crystal_density_diffrn      3.324
+_exptl_crystal_density_meas        ?
+_exptl_crystal_density_method      ?
+_exptl_crystal_description         ?
+_exptl_crystal_F_000               429
+loop_
+  _exptl_crystal_face_index_h
+  _exptl_crystal_face_index_k
+  _exptl_crystal_face_index_l
+  _exptl_crystal_face_perp_dist
+ 0 0 -1 0.0100
+ 2 -3 0 0.0723
+ -5 -1 0 0.0800
+ 0 0 1 0.0100
+ -1 3 0 0.0683
+ 5 1 0 0.0800
+
+_exptl_crystal_size_max            0.17
+_exptl_crystal_size_mid            0.16
+_exptl_crystal_size_min            0.02
+loop_
+  _exptl_oxdiff_crystal_face_indexfrac_h
+  _exptl_oxdiff_crystal_face_indexfrac_k
+  _exptl_oxdiff_crystal_face_indexfrac_l
+  _exptl_oxdiff_crystal_face_x
+  _exptl_oxdiff_crystal_face_y
+  _exptl_oxdiff_crystal_face_z
+ -0.0033 0.0038 -0.8042 -0.0248 -0.0015 0.0014
+ 2.0652 -3.3023 -0.1442 -0.0139 0.2666 0.0483
+ -4.5299 -0.8393 0.0719 -0.0305 0.0828 -0.4611
+ 0.0033 -0.0038 0.8042 0.0248 0.0015 -0.0014
+ -0.9660 2.8918 0.1082 0.0167 -0.2360 0.0366
+ 4.5299 0.8393 -0.0719 0.0305 -0.0828 0.4611
+
+_exptl_transmission_factor_max     ?
+_exptl_transmission_factor_min     ?
+_diffrn_reflns_av_R_equivalents    0.0335
+_diffrn_reflns_av_unetI/netI       0.0254
+_diffrn_reflns_Laue_measured_fraction_full  0.279
+_diffrn_reflns_Laue_measured_fraction_max  0.188
+_diffrn_reflns_limit_h_max         7
+_diffrn_reflns_limit_h_min         -8
+_diffrn_reflns_limit_k_max         8
+_diffrn_reflns_limit_k_min         -8
+_diffrn_reflns_limit_l_max         5
+_diffrn_reflns_limit_l_min         -4
+_diffrn_reflns_number              291
+_diffrn_reflns_point_group_measured_fraction_full  0.279
+_diffrn_reflns_point_group_measured_fraction_max  0.188
+_diffrn_reflns_theta_full          16.950
+_diffrn_reflns_theta_max           21.972
+_diffrn_reflns_theta_min           2.819
+_diffrn_ambient_temperature        293(2)
+_diffrn_detector                   'Hybrid Pixel Array Detector'
+_diffrn_detector_area_resol_mean   13.3333
+_diffrn_measured_fraction_theta_full  0.279
+_diffrn_measured_fraction_theta_max  0.188
+_diffrn_measurement_details
+;
+List of Runs (angles in degrees, time in seconds):
+
+  # Type    Start    End  Width  t~exp~   \w     \q     \k     \f   Frames
+--------------------------------------------------------------------------
+  1  \f    -27.00  28.00   0.20    0.20 -90.00   0.00   0.00    --   275
+  2  \f   -167.00-112.00   0.20    0.20-130.00   0.00   0.00    --   275
+;
+_diffrn_measurement_device         'abstract diffractometer'
+_diffrn_measurement_device_type   
+ 'dectris-CrysAlisPro-abstract goniometer imported dectris images'
+_diffrn_measurement_method         '\f scans'
+_diffrn_orient_matrix_axis[1]      matrixX
+_diffrn_orient_matrix_axis[2]      matrixY
+_diffrn_orient_matrix_axis[3]      matrixZ
+_diffrn_orient_matrix_type        
+ 'CrysAlisPro convention (1999,Acta A55,543-557)'
+_diffrn_orient_matrix_UB_11        0.0060004333
+_diffrn_orient_matrix_UB_12        0.0066117667
+_diffrn_orient_matrix_UB_13        0.0309012667
+_diffrn_orient_matrix_UB_21        -0.0029370667
+_diffrn_orient_matrix_UB_22        -0.0826437333
+_diffrn_orient_matrix_UB_23        0.0014551667
+_diffrn_orient_matrix_UB_31        0.0936108333
+_diffrn_orient_matrix_UB_32        0.0440089667
+_diffrn_orient_matrix_UB_33        -0.0018604333
+_diffrn_oxdiff_ac3_digest_hkl      0111aaa889661f2301eb4d7e22e15ef5eb9621
+_diffrn_radiation_monochromator    synchrotron
+_diffrn_radiation_probe            x-ray
+_diffrn_radiation_type             synchrotron
+_diffrn_radiation_wavelength       0.4859
+_diffrn_source                     synchrotron
+_reflns_Friedel_coverage           0.000
+_reflns_Friedel_fraction_full      .
+_reflns_Friedel_fraction_max       .
+_reflns_number_gt                  71
+_reflns_number_total               79
+_reflns_special_details
+;
+ Reflections were merged by SHELXL according to the crystal
+ class for the calculation of statistics and refinement.
+ 
+ _reflns_Friedel_fraction is defined as the number of unique
+ Friedel pairs measured divided by the number that would be
+ possible theoretically, ignoring centric projections and
+ systematic absences.
+;
+_reflns_threshold_expression       'I > 2\s(I)'
+_computing_cell_refinement         'CrysAlisPro 1.171.42.90a (Rigaku OD, 2023)'
+_computing_data_collection         'CrysAlisPro 1.171.42.90a (Rigaku OD, 2023)'
+_computing_data_reduction          'CrysAlisPro 1.171.42.90a (Rigaku OD, 2023)'
+_computing_molecular_graphics      'Olex2 1.5 (Dolomanov et al., 2009)'
+_computing_publication_material    'Olex2 1.5 (Dolomanov et al., 2009)'
+_computing_structure_refinement    'SHELXL 2018/3 (Sheldrick, 2015)'
+_computing_structure_solution      'SHELXD  (Sheldrick, 2008)'
+_refine_diff_density_max           5.353
+_refine_diff_density_min           -1.743
+_refine_diff_density_rms           0.621
+_refine_ls_extinction_coef         .
+_refine_ls_extinction_method       none
+_refine_ls_goodness_of_fit_ref     1.226
+_refine_ls_hydrogen_treatment      undef
+_refine_ls_matrix_type             full
+_refine_ls_number_parameters       9
+_refine_ls_number_reflns           79
+_refine_ls_number_restraints       0
+_refine_ls_R_factor_all            0.1300
+_refine_ls_R_factor_gt             0.1243
+_refine_ls_restrained_S_all        1.226
+_refine_ls_shift/su_max            0.000
+_refine_ls_shift/su_mean           0.000
+_refine_ls_structure_factor_coef   Fsqd
+_refine_ls_weighting_details      
+ 'w=1/[\s^2^(Fo^2^)+(0.1218P)^2^+455.0616P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme        calc
+_refine_ls_wR_factor_gt            0.3088
+_refine_ls_wR_factor_ref           0.3140
+_refine_special_details            ?
+_olex2_refinement_description
+;
+;
+_atom_sites_solution_hydrogens     .
+_atom_sites_solution_primary       dual
+_atom_sites_solution_secondary     ?
+loop_
+  _atom_site_label
+  _atom_site_type_symbol
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_U_iso_or_equiv
+  _atom_site_adp_type
+  _atom_site_occupancy
+  _atom_site_site_symmetry_order
+  _atom_site_calc_flag
+  _atom_site_refinement_flags_posn
+  _atom_site_refinement_flags_adp
+  _atom_site_refinement_flags_occupancy
+  _atom_site_disorder_assembly
+  _atom_site_disorder_group
+ Se00 Se 0.9619(9) 0.2990(9) 0.0793(12) 0.015(2) Uiso 1 1 d . . . . .
+ Fe00 Fe 1.000000 0.000000 0.166(3) 0.015(3) Uiso 1 3 d S . P . .
+ P1 P 1.333333 0.666667 0.098(5) 0.008(4) Uiso 1 3 d S . P . .
+
+_geom_special_details
+;
+ All esds (except the esd in the dihedral angle between two l.s. planes)
+ are estimated using the full covariance matrix.  The cell esds are taken
+ into account individually in the estimation of esds in distances, angles
+ and torsion angles; correlations between esds in cell parameters are only
+ used when they are defined by crystal symmetry.  An approximate (isotropic)
+ treatment of cell esds is used for estimating esds involving l.s. planes.
+;
+loop_
+  _geom_bond_atom_site_label_1
+  _geom_bond_atom_site_label_2
+  _geom_bond_distance
+  _geom_bond_site_symmetry_2
+  _geom_bond_publ_flag
+ Se00 Fe00 2.35(3) . ?
+ Se00 Fe00 2.33(3) 13_655 ?
+ Se00 P1 2.244(12) . ?
+ P1 P1 2.12(14) 13_765 ?
+
+loop_
+  _geom_angle_atom_site_label_1
+  _geom_angle_atom_site_label_2
+  _geom_angle_atom_site_label_3
+  _geom_angle
+  _geom_angle_site_symmetry_1
+  _geom_angle_site_symmetry_3
+  _geom_angle_publ_flag
+ Fe00 Se00 Fe00 96.1(7) 13_655 . ?
+ P1 Se00 Fe00 105.4(15) . 13_655 ?
+ P1 Se00 Fe00 104.5(13) . . ?
+ Se00 Fe00 Se00 90.5(16) 3_765 . ?
+ Se00 Fe00 Se00 83.9(7) 15_545 3_765 ?
+ Se00 Fe00 Se00 170.7(3) 14 . ?
+ Se00 Fe00 Se00 83.9(7) 13_655 . ?
+ Se00 Fe00 Se00 89.4(16) 14 15_545 ?
+ Se00 Fe00 Se00 97.0(6) 14 3_765 ?
+ Se00 Fe00 Se00 89.4(16) 14 13_655 ?
+ Se00 Fe00 Se00 90.5(16) 2_645 3_765 ?
+ Se00 Fe00 Se00 89.4(16) 15_545 13_655 ?
+ Se00 Fe00 Se00 97.0(6) 15_545 . ?
+ Se00 Fe00 Se00 83.9(7) 14 2_645 ?
+ Se00 Fe00 Se00 90.5(16) 2_645 . ?
+ Se00 Fe00 Se00 170.7(3) 15_545 2_645 ?
+ Se00 Fe00 Se00 97.0(6) 13_655 2_645 ?
+ Se00 Fe00 Se00 170.7(3) 13_655 3_765 ?
+ Se00 P1 Se00 118.4(9) 2_755 . ?
+ Se00 P1 Se00 118.4(9) 3_775 . ?
+ Se00 P1 Se00 118.4(9) 3_775 2_755 ?
+ P1 P1 Se00 97(2) 13_765 . ?
+ P1 P1 Se00 97(2) 13_765 3_775 ?
+ P1 P1 Se00 97(2) 13_765 2_755 ?
+
+_shelx_res_file
+;
+TITL 015_ST4_FePSe3_P7_10p0_0 in R-3 #148
+    015_st4_fepse3_p7_10p0_0.res
+    created by SHELXL-2018/3 at 15:41:45 on 16-Apr-2025
+REM Best SHELXD solution FINAL CC 62.26
+REM Fragments: 2
+CELL 0.4859 6.0195 6.0195 15.46 90 90 120
+ZERR 3 0.0016 0.0016 0.1396 0 0 0
+LATT 3
+SYMM -Y,+X-Y,+Z
+SYMM +Y-X,-X,+Z
+SFAC P Fe Se
+DISP Fe 0.2486 0.4181 1193.9721
+DISP P 0.0517 0.0444 136.3362
+DISP Se 0.2928 1.1575 3250.914
+UNIT 3 3 9
+
+L.S. 4 0 0
+PLAN  4
+SIZE 0.02 0.16 0.17
+CONF
+fmap 2 53
+acta
+MORE -1
+OMIT -4 6 -3
+OMIT -4 6 5
+OMIT -4 7 4
+OMIT 0 8 1
+OMIT 3 4 -3
+REM <olex2.extras>
+REM <HklSrc "%.\\015_ST4_FePSe3_P7_10p0_0.hkl">
+REM </olex2.extras>
+
+WGHT    0.121800  455.061615
+FVAR       0.18799
+SE00  3    0.961866    0.298981    0.079305    11.00000    0.01466
+FE00  2    1.000000    0.000000    0.166244    10.33333    0.01516
+P1    1    1.333333    0.666667    0.098037    10.33333    0.00830
+HKLF 4
+
+
+
+
+REM  015_ST4_FePSe3_P7_10p0_0 in R-3 #148
+REM wR2 = 0.3140, GooF = S = 1.226, Restrained GooF = 1.226 for all data
+REM R1 = 0.1243 for 71 Fo > 4sig(Fo) and 0.1300 for all 79 data
+REM 9 parameters refined using 0 restraints
+
+END
+
+WGHT      0.1209    456.4439
+
+REM Highest difference peak  5.353,  deepest hole -1.743,  1-sigma level  0.621
+Q1    1   1.0000  0.0000  0.0000  10.16667  0.05    5.35
+Q2    1   1.0351  0.3504  0.1113  11.00000  0.05    2.74
+Q3    1   0.6667  0.3333  0.0348  10.33333  0.05    2.58
+Q4    1   0.6913 -0.0287  0.0989  11.00000  0.05    1.78
+;
+_shelx_res_checksum                51380
+_shelx_hkl_file
+;
+   0   1  -1   82.58    2.06
+   1  -1  -1  100.84    2.88
+  -1   2   0  110.53    4.46
+   1  -2   0  103.67    3.90
+   1  -2   0   97.24    4.36
+   0   2   1  399.04    8.83
+  -2   2  -1  379.84    6.80
+   2  -2   1  381.36    6.74
+   0  -2   2   92.34    3.77
+   0  -2   2   92.29    3.79
+  -2   2   2   91.53    4.57
+   0   2  -2   82.91    3.15
+   0   2  -2   99.71    3.72
+  -3   2   1  295.94    7.40
+  -1   3  -1  275.40    7.53
+   2   1   1  268.25    6.05
+   3  -2  -1  265.01    7.49
+   1  -3   1  272.26    8.65
+   1  -3  -2  235.66    8.43
+  -1   3   2  178.95   10.10
+   3  -2   2  239.83    5.74
+   1  -3  -2  301.39    9.28
+  -1   3   2  295.62    9.64
+  -2  -1   2  258.98    4.63
+   2  -3   2  270.34    7.39
+  -2   3  -2  283.74    6.94
+   1   2  -1  184.26    4.89
+  -2   3   1  198.08    9.45
+   1   2  -1  190.02    6.68
+   2  -3  -1  198.23    7.83
+  -3   3  -3  151.75    5.29
+   0   3   0 9869.70   58.21
+   0   3   0 9999.00   45.64
+  -3   3   0 9965.20   52.97
+   0  -3   0 9922.33   51.21
+  -3   3   0 9748.53   45.43
+   3  -3   0 9713.71   40.34
+   3  -3   0 9736.90   53.24
+   0  -3   3  190.62    6.24
+   1  -4   2  244.73    8.12
+  -1   4  -2  252.65    8.16
+  -1   4  -2  236.95    9.29
+   1  -4   2  248.05    9.71
+  -4   3  -1  828.42   12.44
+  -1   4   1  881.81   17.95
+  -4   3  -1  698.89   15.64
+   1  -4  -1  815.52   17.72
+   4  -3   1  813.29   12.98
+  -1   4   1  728.76   20.40
+   4  -3   1  842.09   16.28
+   1  -4  -1  748.10   15.61
+  -2   4  -3 1240.30   19.63
+   2  -4   3 1044.02   16.74
+  -2   4  -3 1150.26   16.78
+   2  -4   3  981.85   17.39
+  -4   2   0    1.08    3.31
+   2  -4   0    0.48    1.99
+  -2   4   0    0.05    3.67
+  -2  -2   0    0.27    1.62
+   2  -4   0    1.49    3.45
+  -2   4   0    1.56    2.42
+   1   3   1  140.75    7.13
+  -3   4  -1  148.38    8.63
+  -1  -3  -1  134.18    6.84
+  -1  -3   2 1027.54   18.06
+   1   3  -2 1016.32   13.62
+   1   3  -2  979.12   17.76
+   3  -4  -2 1009.20   19.45
+   4  -4   2  170.46    7.28
+   4  -4   2  171.25    8.67
+  -4   4  -2  171.14    8.46
+   0   4  -1  191.30    7.36
+  -4   4   1  174.29    7.68
+   0   4  -1  178.40    9.62
+   4  -4  -1  175.05    9.16
+   4  -4  -1  193.69    7.08
+   1  -5   3 1885.85   25.37
+  -5   4   3 1758.98   27.05
+  -1   5  -3 1830.48   27.91
+  -1   5  -3 1959.62   25.25
+   1  -5   3 1778.83   27.60
+   5  -4  -3 1936.92   26.23
+  -5   4   0    1.25    6.17
+  -5   4   0    1.82    2.45
+   1  -5   0    0.60    2.88
+   5  -4   0    0.51    2.59
+  -1   5   0    0.81    3.40
+  -1   5   0   -1.31    5.82
+   5  -4   0    1.18    4.36
+   1  -5   0    1.19    4.37
+   5  -4   3  293.89   12.07
+  -5   4  -3  320.62   11.40
+   2  -5   4  254.21   10.29
+  -2   5  -4  284.62   10.27
+  -5   3   1  641.82   10.43
+   3   2   1  712.30   11.78
+   2  -5   1  660.52   13.24
+   5  -3  -1  625.08   10.66
+  -2   5  -1  620.77   13.47
+  -2   5  -1  556.80   15.72
+   2  -5   1  685.19   17.62
+   5  -3   2   47.41    5.48
+  -2   5   2   56.45    6.22
+  -2   5   2   36.29    8.14
+  -3  -2   2   55.85    4.70
+   2  -5  -2   57.39    6.40
+   2  -5  -2   68.93    6.20
+  -5   3  -2   65.32    5.82
+  -5   2   2  215.21    5.06
+   3  -5   2  220.43    8.11
+   3  -5   2  224.32   10.67
+  -3   5  -2  208.53    7.75
+   3  -5  -1  211.33    7.94
+   3  -5  -1  204.72   10.58
+   5  -2   1  166.80    6.84
+  -5   2  -1  201.03    8.70
+  -2  -3   1  188.18    8.73
+   2   3  -1  206.20    6.57
+  -3   5   1  192.53    8.44
+  -3   5   1  206.19   12.97
+  -2  -3   4  453.33   11.86
+   2   3  -4  361.19   10.13
+   4  -5   3 1633.97   26.41
+   4  -5   3 1660.66   22.06
+  -1  -4   0    2.76    2.91
+   4  -5   0    5.52    2.96
+   4  -5   0    1.69    4.63
+  -1  -4   0    2.91    4.26
+  -1  -4   3  354.74   12.23
+   4  -5  -3  456.40   13.27
+   0  -5  -1  922.68   16.87
+   0   5   1  867.94   17.97
+  -5   5  -1  839.35   22.22
+   0  -5  -1  827.06   19.35
+  -5   5  -1  892.53   15.27
+   0  -5   2  249.43    9.12
+   0   5  -2  227.52    8.61
+  -5   5   2  241.81    9.75
+   0  -5   2  244.82   11.81
+   1  -6   4  170.60   10.44
+  -1   6  -4  205.31   11.78
+   6  -5  -1  157.52    7.81
+  -6   5   1  139.93    7.18
+  -1   6  -1  137.98    7.59
+   6  -5  -1  126.14    9.74
+  -1   6  -1  133.47   11.83
+   1  -6   1  127.64    9.45
+  -1   6   2  127.39    8.06
+  -6   5  -2  159.56   12.04
+   6  -5   2  143.46   10.79
+   6  -4  -2  767.53   13.75
+   2  -6   2  812.53   16.53
+  -2   6  -2  727.57   15.42
+   4   2   2  646.30   12.78
+  -2   6  -2  675.58   18.55
+   2  -6   2  747.44   19.84
+  -6   4   2  765.56   14.06
+   6  -3  -3  200.03    6.42
+   3  -6   3  211.67   11.28
+  -3   6  -3  260.58   10.45
+   3  -6   3  241.54   10.46
+  -3   6  -3  276.68   12.84
+  -6   3   3  237.10    7.59
+   3  -6   0 2259.36   26.63
+   3   3   0 2374.21   22.13
+  -3   6   0 2312.45   40.26
+   3  -6   0 2271.85   34.00
+  -3   6   0 2350.08   29.38
+   6  -3   3   40.52    6.24
+   3   3  -3   41.34    6.95
+  -3  -3   3   52.35    6.18
+   3  -6  -3   63.89    6.69
+  -4   6  -4  352.38   13.52
+   4  -6   4  290.68   12.59
+  -2  -4  -1  862.28   16.26
+   4  -6   1  831.40   17.00
+  -4   6  -1  816.05   16.81
+   2   4   1  958.86   19.35
+  -4   6  -1  815.84   23.16
+   4  -6   1  698.59   18.87
+   4  -6  -2  387.52   11.55
+   4  -6  -2  358.40   14.43
+  -4   6   2  352.08   12.28
+   2   4  -2  345.32   15.82
+  -2  -4   2  406.85   14.31
+  -2  -4   5   16.62    4.78
+  -5   6  -2   88.88    6.80
+   5  -6   2   83.17    7.04
+   1   5   2   82.81    6.85
+  -5   6  -2   77.61    8.46
+   5  -6   2   86.94    8.97
+   5  -6  -1  117.81    7.10
+   5  -6  -1  110.76    9.89
+   1   5  -1  121.48    7.34
+  -1  -5   1  115.10    8.99
+  -5   6   1   77.83   10.21
+   1   5  -1   72.16    9.15
+  -5   6   1  115.38    7.66
+  -1  -5   4   23.69    5.50
+   1   5  -4   26.15    6.20
+   6  -6   3   45.37    8.02
+   0   6   0 1230.97   21.73
+   6  -6   0 1250.85   20.64
+   6  -6  -3  117.08    7.35
+   0  -6   3  135.03    8.68
+   0   6  -3  104.46    7.05
+  -6   6   3  109.62    8.20
+   0   6  -3  106.74   10.61
+   0  -6   3  107.24    8.78
+   1  -7   2  305.13   13.05
+  -1   7  -2  277.25   16.98
+   1  -7   2  260.49   13.56
+  -1   7  -2  270.52   10.69
+   1  -7  -1  649.68   16.25
+   7  -6   1  567.17   20.86
+   1  -7  -1  550.95   18.10
+  -1   7   1  625.03   17.36
+   2  -7   3   91.53    7.79
+  -2   7  -3  102.56    7.98
+  -2   7  -3   86.62    9.69
+   2  -7   3   77.98    8.78
+   2  -7   0  172.73    8.52
+  -2   7   0  163.27    8.59
+   2  -7   0  170.22   11.41
+  -3   7  -4  252.75   13.17
+   3  -7   1   -6.78    5.86
+  -3   7  -1   24.05    8.73
+   3  -7  -2  528.03   13.99
+   3  -7  -2  483.48   16.75
+  -3   7   2  530.02   15.93
+  -4   7  -2   73.23    6.14
+   4  -7   2   69.90    8.23
+   4  -7  -1  280.06   10.57
+  -4   7   1  254.97   11.05
+  -3  -4   4   -1.72    4.84
+   5  -7   0  144.91    8.52
+   2   5   0  155.51    8.62
+   5  -7   0  131.01   10.81
+   5  -7  -3  547.78   14.53
+   2   5  -3  518.95   22.14
+   6  -7  -2  901.01   18.75
+   1   6  -2  929.16   18.96
+  -7   7  -2   13.06   10.62
+   7  -7   2   36.40    8.78
+   0   7  -1   10.13    9.54
+  -7   7   1    6.55    4.02
+   0   7  -1    7.53    4.14
+   7  -7  -1    6.91    4.19
+   0  -7   1    4.46    5.41
+   0  -7   1    6.69    5.94
+   0   7  -4    4.60    7.58
+   0  -7   4    2.42    5.66
+  -1   8  -3   46.43   11.27
+  -1   8   0   16.91    4.93
+   1  -8   0    6.77    4.81
+   1  -8   0   17.27    6.62
+  -2   8  -4   59.57    9.78
+   2  -8   4   76.52    8.44
+  -2   8  -1  117.76    7.80
+   2  -8   1  127.15   10.86
+   3  -8   2   64.16    7.84
+  -3   8  -2   59.29   10.65
+   3  -8   2   60.71    8.59
+  -3   8   1  290.04   11.52
+   3  -8  -1  254.47   10.43
+   3  -8  -1  264.83   13.71
+   4  -8   3  117.43    8.69
+  -4   8  -3  136.18    8.18
+  -4   8  -3  108.90   11.41
+   4  -8   3  114.80    9.68
+  -4   8   0    0.50    7.55
+   4  -8   0   -0.44    4.00
+  -4   8   0    4.59    4.08
+   4  -8   0    3.09    6.24
+   5  -8   1  475.50   15.99
+   5  -8   1  460.07   18.32
+  -5   8  -1  417.38   13.03
+   5  -8  -2   75.63    6.66
+  -5   8   2   90.89    7.77
+   6  -8   2   18.66    7.60
+  -6   8  -2    4.24    9.15
+   6  -8   2    7.60    5.09
+  -6   8  -2    8.14    4.23
+  -6   8   1    9.57   10.70
+   6  -8  -1   31.34    7.81
+  -7   8   0   43.31    6.73
+  -7   8   0    4.34   11.49
+  -1  -7   0   18.47    6.74
+   1   7   0   54.75    6.46
+   1   7  -3    9.38    9.13
+  -1  -7   3   10.52    6.53
+  -8   8  -1    2.11   14.14
+   0   8  -2    7.47   11.21
+   0  -8   2   34.07    8.33
+   0   0   0    0.00    0.00
+
+
+
+
+
+
+TITL 015_ST4_FePSe3_P7_10p0_0 in R-3
+REM R-3 (#148 in standard setting)
+CELL 0.48590   6.019512   6.019512  15.459973  90.0000  90.0000 120.0000
+ZERR    3.00   0.001581   0.001581   0.139633   0.0000   0.0000   0.0000
+LATT  3
+SYMM -y, x-y, z
+SYMM -x+y,-x, z
+SFAC P Fe Se
+UNIT 3.00 3.00 9.00
+SIZE 0.02 0.16 0.17
+TREF
+HKLF 4
+END
+_computing_structure_solution     'SHELXT 2018/2 (Sheldrick, 2018)'
+_computing_structure_solution     'SHELXT 2018/2 (Sheldrick, 2018)'
+_computing_structure_solution     'SHELXT 2018/2 (Sheldrick, 2018)'
+_computing_structure_solution     'SHELXT 2018/2 (Sheldrick, 2018)'
+_computing_structure_solution     'SHELXT 2018/2 (Sheldrick, 2018)'
+;
+_shelx_hkl_checksum                82211
+loop_
+  _axis.id
+  _axis.type
+  _axis.equipment
+  _axis.parity
+  _axis.depends_on
+  _axis.zero
+  _axis.vector[1]
+  _axis.vector[2]
+  _axis.vector[3]
+ source . source . . . 1.00000000 0.00000000 0.00000611
+ omega rotation goniometer -1 . 89.98470000 0.00000000 0.00000000 1.00000000
+ kappa rotation goniometer -1 omega 0.00000000 -0.76411857 0.00000000 0.64507581
+ phi rotation goniometer -1 kappa . 0.00000000 0.00000000 1.00000000
+ theta rotation goniometer -1 . 0.05113000 0.00000000 0.00000000 1.00000000
+ matrixX general general . phi . 1.00000000 0.00000000 0.00000000
+ matrixY general general . phi . 0.00000000 1.00000000 0.00000000
+ matrixZ general general . phi . 0.00000000 0.00000000 1.00000000
+ dacX translation general . phi . 0.00000000 1.00000000 0.00000000
+ dacY translation general . phi . -1.00000000 0.00000000 0.00000000
+ dacZ translation general . phi . 0.00000000 0.00000000 1.00000000
+
+_olex2_submission_special_instructions  'No special instructions were received'
+_oxdiff_exptl_absorpt_empirical_details
+;
+Empirical correction (ABSPACK) includes:
+- Absorption correction using spherical harmonics
+- Frame scaling
+;
+_oxdiff_exptl_absorpt_empirical_full_max  2.063
+_oxdiff_exptl_absorpt_empirical_full_min  0.581
