@@ -51,7 +51,7 @@ def main(input_file, compare_fcf=False, plot_fcf=False, compare_vesta_hkl=False,
     df_vesta_rm3 = parse_hkl_vesta(inp.vesta_file2, inp.tag2_vesta, inp.a, inp.c)
 
     print("\nStarting analysis...")
-    # Perform comparisons
+    # Perform comparisons across hkl idex
     if compare_fcf:
         compare_hkl(df_fcf_r3, df_fcf_rm3, inp.out_fcf)
         print(f"\n=== Comparing FCF files: {inp.fcf_r3} and {inp.fcf_rm3} is done.")
@@ -64,10 +64,10 @@ def main(input_file, compare_fcf=False, plot_fcf=False, compare_vesta_hkl=False,
         print(f"\n=== Comparing FCF and VESTA HKL: {inp.fcf_r3} and {inp.vesta_file1}")
         compare_hkl(df_fcf_r3, df_vesta_r3, f"{inp.out_fcf_vesta}_hkl")
 
+    # perform d-spacing comparison
     if compare_d:
         tolerance = getattr(inp, 'tolerance', 0.0001) 
         for sg in ['R3', 'Rm3']:
-            print(f"\n=== Comparing d-spacing for {sg} model with tolerance {tolerance}")
             if sg == 'R3':
                 df_fcf = df_fcf_r3
                 df_vesta = df_vesta_r3
@@ -76,7 +76,10 @@ def main(input_file, compare_fcf=False, plot_fcf=False, compare_vesta_hkl=False,
                 df_vesta = df_vesta_rm3
             compare_d_spacing(df_fcf, df_vesta, 
                               outfile=f"{inp.out_fcf_vesta}_dspacing_{sg}", tolerance=tolerance)
-        
+            
+        compare_fcf_in_dspacing(df_fcf_rm3, df_fcf_r3, 
+                                outfile=f"{inp.out_fcf_vesta}_dspacing_fcf_R3_Rm3", tolerance=tolerance)
+
     if plot_fcf:
         #### future update: all for x,y to be read as inputs, and set title accordingly
         # R3 plot: x = calc (R3), y = meas (R3)

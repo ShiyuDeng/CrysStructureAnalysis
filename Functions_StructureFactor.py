@@ -165,93 +165,108 @@ def compare_hkl(df1, df2, outfile):
 def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
     """
     Compare d-spacings between two datasets and find matches.
+    Groups FCF reflections by d-spacing to avoid duplicate VESTA matches.
     
     Args:
         df1: exp. data, from parse_reflection_fcf (with columns: h, k, l, f2_calc, f2_meas, d)
         df2: model, from parse_hkl_vesta (with columns: h, k, l, d_direct, d_calc, StructureFactor, Intensity)
         outfile: Output file path to save results
-        tolerance: Tolerance for d-spacing matching (default: 0.01 Å)
+        tolerance: Tolerance for d-spacing matching (default: 0.0001 Å)
     
     Returns:
         results: DataFrame with matched d-spacings and associated data
     """
-    results = []
+    # Group FCF reflections by d-spacing (rounded to handle floating point precision)
+    df1_grouped = df1.groupby(df1['d'].round(6))
     
-    # Iterate through each row in df1
-    for idx1, row1 in df1.iterrows():
-        d1 = row1['d']
-        h1, k1, l1 = row1['h'], row1['k'], row1['l']
-        f2_meas = row1['f2_meas']
-        f2_calc = row1['f2_calc']
+    results = []
+    d_spacing_groups = []
+    
+    for d_spacing, group in df1_grouped:
+        # Get all FCF reflections with this d-spacing
+        fcf_reflections = []
+        for _, row in group.iterrows():
+            fcf_reflections.append({
+                'h': row['h'], 'k': row['k'], 'l': row['l'],
+                'd': row['d'], 'f2_calc': row['f2_calc'], 'f2_meas': row['f2_meas']
+            })
         
-        # Find all matching d-spacings in df2 within tolerance
-        matches_in_df2 = []
-        for idx2, row2 in df2.iterrows():
-            d2 = row2['d_calc']
-            if abs(d1 - d2) <= tolerance:
-                matches_in_df2.append({
-                    'df2_h': row2['h'],
-                    'df2_k': row2['k'],
-                    'df2_l': row2['l'],
-                    'df2_d_calc': d2,
-                    'df2_Intensity': row2['Intensity'],
-                    'd_difference': abs(d1 - d2)
+        # Find VESTA matches for this d-spacing (use the first reflection's d-spacing as reference)
+        reference_d = fcf_reflections[0]['d']
+        vesta_matches = []
+        
+        for _, row2 in df2.iterrows():
+            if abs(reference_d - row2['d_calc']) <= tolerance:
+                vesta_matches.append({
+                    'h': row2['h'], 'k': row2['k'], 'l': row2['l'],
+                    'd_calc': row2['d_calc'], 'StructureFactor': row2['StructureFactor'], 'Intensity': row2['Intensity'],
+                    'd_difference': abs(reference_d - row2['d_calc'])
                 })
         
-        if matches_in_df2:
-            matches_in_df2.sort(key=lambda x: x['d_difference'])
-            
-            for i, match in enumerate(matches_in_df2):
+        # Sort VESTA matches by d_difference
+        vesta_matches.sort(key=lambda x: x['d_difference'])
+        
+        # Store the grouped information
+        d_spacing_groups.append({
+            'fcf_reflections': fcf_reflections,
+            'vesta_matches': vesta_matches,
+            'd_spacing': reference_d
+        })
+        
+        # Create results entries for individual row tracking (for compatibility)
+        for fcf_refl in fcf_reflections:
+            if vesta_matches:
+                for i, vesta_match in enumerate(vesta_matches):
+                    result_entry = {
+                        'df1_h': fcf_refl['h'],
+                        'df1_k': fcf_refl['k'],
+                        'df1_l': fcf_refl['l'],
+                        'df1_d': fcf_refl['d'],
+                        'df1_f2_meas': fcf_refl['f2_meas'],
+                        'df1_f2_calc': fcf_refl['f2_calc'],
+                        'df2_h': vesta_match['h'],
+                        'df2_k': vesta_match['k'],
+                        'df2_l': vesta_match['l'],
+                        'df2_d_calc': vesta_match['d_calc'],
+                        'df2_Intensity': vesta_match['Intensity'],
+                        'd_difference': vesta_match['d_difference'],
+                        'match_rank': i + 1
+                    }
+                    results.append(result_entry)
+            else:
+                # No matches found
                 result_entry = {
-                    'df1_h': h1,
-                    'df1_k': k1,
-                    'df1_l': l1,
-                    'df1_d': d1,
-                    'df1_f2_meas': f2_meas,
-                    'df1_f2_calc': f2_calc,
-                    'df2_h': match['df2_h'],
-                    'df2_k': match['df2_k'],
-                    'df2_l': match['df2_l'],
-                    'df2_d_calc': match['df2_d_calc'],
-                    'df2_Intensity': match['df2_Intensity'],
-                    'd_difference': match['d_difference'],
-                    'match_rank': i + 1 
+                    'df1_h': fcf_refl['h'],
+                    'df1_k': fcf_refl['k'],
+                    'df1_l': fcf_refl['l'],
+                    'df1_d': fcf_refl['d'],
+                    'df1_f2_meas': fcf_refl['f2_meas'],
+                    'df1_f2_calc': fcf_refl['f2_calc'],
+                    'df2_h': None,
+                    'df2_k': None,
+                    'df2_l': None,
+                    'df2_d_calc': None,
+                    'df2_Intensity': None,
+                    'd_difference': None,
+                    'match_rank': 0
                 }
                 results.append(result_entry)
-        else:
-            # No matches found - still record the df1 entry
-            result_entry = {
-                'df1_h': h1,
-                'df1_k': k1,
-                'df1_l': l1,
-                'df1_d': d1,
-                'df1_f2_meas': f2_meas,
-                'df1_f2_calc': f2_calc,
-                'df2_h': None,
-                'df2_k': None,
-                'df2_l': None,
-                'df2_d_calc': None,
-                'df2_Intensity': None,
-                'd_difference': None,
-                'match_rank': 0  # 0 indicates no match found
-            }
-            results.append(result_entry)
     
     # Convert to DataFrame
     results_df = pd.DataFrame(results)
     
     # Save results to file
+    print(f"\n=== Comparing d-spacing {df1['tag'].iloc[0]} vs {df2['tag'].iloc[0]} with tolerance {tolerance}")
     with open(outfile, 'w') as f:
-        # Print out df1 and df2 in tabular format first
-        
-        f.write("d-spacing Comparison\n")
+        # Print header and summary
+        f.write("FCF vs VESTA d-spacing Comparison\n")
         f.write(f"{df1['tag'].iloc[0]} vs {df2['tag'].iloc[0]}\n")
         f.write("="*80 + "\n")
         f.write(f"Tolerance used: {tolerance} Å\n")
-        f.write(f"Total reflections in df1: {len(df1)}\n")
-        f.write(f"Total reflections in df2: {len(df2)}\n")
-        f.write(f"Total matches found: {len(results_df[results_df['match_rank'] > 0])}\n")
-        f.write(f"Reflections in df1 without matches: {len(results_df[results_df['match_rank'] == 0])}\n")
+        f.write(f"Total reflections in {df1['tag'].iloc[0]}: {len(df1)}\n")
+        f.write(f"Total reflections in {df2['tag'].iloc[0]}: {len(df2)}\n")
+        f.write(f"Unique d-spacing groups in {df1['tag'].iloc[0]}: {len(d_spacing_groups)}\n")
+        f.write(f"d-spacing groups without matches: {len([g for g in d_spacing_groups if not g['vesta_matches']])}\n")
         f.write("\n")
         
         # Write df1 in tabular format
@@ -278,40 +293,213 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
         
         f.write("\n")
         
-        # Write comparison results
+        # Write comparison results using grouped format
         f.write("="*80 + "\n")
-        f.write("d-spacing Comparison Results:\n")
+        f.write("FCF vs VESTA d-spacing Comparison Results (Grouped by d-spacing):\n")
+        f.write(f"FCF:{df1['tag'].iloc[0]}\n")
+        f.write(f"VESTA:{df2['tag'].iloc[0]}\n")
         f.write("="*80 + "\n")
         
-        # Write column headers with left alignment
-        f.write(f"{'d_spacing':<10} {'exp. (h,k,l)':<15} {'exp. F^2_meas':<15} {'exp. F^2_calc':<15} {'VESTA (h,k,l)':<15} {'Simulated Intensity':<15}\n")
-        f.write("-" * 78 + "\n")
-        
-        # Group results by df1 entries to avoid repetition
-        current_df1_key = None
-        for _, row in results_df.iterrows():
-            df1_key = (int(row['df1_h']), int(row['df1_k']), int(row['df1_l']))
-            df1_hkl = f"({df1_key[0]},{df1_key[1]},{df1_key[2]})"
+        # Process each d-spacing group
+        for group in d_spacing_groups:
+            fcf_reflections = group['fcf_reflections']
+            vesta_matches = group['vesta_matches']
+            d_spacing = group['d_spacing']
             
-            # Only show df1 info once per unique reflection
-            if df1_key != current_df1_key:
-                current_df1_key = df1_key
-                df1_d = f"{row['df1_d']:.4f}"
-                df1_f2_meas = f"{row['df1_f2_meas']:.2f}"
-                df1_f2_calc = f"{row['df1_f2_calc']:.2f}"
-                
-                if row['match_rank'] > 0:
-                    df2_hkl = f"({int(row['df2_h'])},{int(row['df2_k'])},{int(row['df2_l'])})"
-                    f.write(f"{df1_d:<10} {df1_hkl:<15} {df1_f2_meas:<15} {df1_f2_calc:<15} {df2_hkl:<15} {row['df2_Intensity']:<12.2f}\n")
-                else:
-                    f.write(f"{df1_d:<10} {df1_hkl:<15} {df1_f2_meas:<15} {df1_f2_calc:<15}{'No match':<15} {'':<10} {'':<12}\n")
+            # Write d-spacing header
+            f.write(f"\nd-spacing: {d_spacing:.4f} Å\n")
+            f.write("-" * 30 + "\n")
+            
+            # Write FCF reflections for this d-spacing
+            f.write("FCF reflections:\n")
+            for refl in fcf_reflections:
+                hkl = f"({int(refl['h'])},{int(refl['k'])},{int(refl['l'])})"
+                f.write(f"  {hkl:<12} F²_calc: {refl['f2_calc']:<8.2f} F²_meas: {refl['f2_meas']:<8.2f}\n")
+            
+            # Write VESTA matches for this d-spacing
+            if vesta_matches:
+                f.write("VESTA matches:\n")
+                for match in vesta_matches:
+                    hkl = f"({int(match['h'])},{int(match['k'])},{int(match['l'])})"
+                    f.write(f"  {hkl:<12} StructFactor: {match['StructureFactor']:<8.2f} Intensity: {match['Intensity']:<8.2f}\n")
             else:
-                # Additional matches for the same df1 reflection - show only df2 info
-                if row['match_rank'] > 0:
-                    df2_hkl = f"({int(row['df2_h'])},{int(row['df2_k'])},{int(row['df2_l'])})"
-                    f.write(f"{'':<10} {'':<15} {'':<15} {'':<15} {df2_hkl:<15} {row['df2_Intensity']:<12.2f}\n")
+                f.write("VESTA matches: None\n")
+            
+            f.write("\n")
     
     print(f"d-spacing comparison results saved to: {outfile}")
+    
+    return results_df
+##############################
+
+
+############# Analysis: compare FCF files in d-spacing #######
+def compare_fcf_in_dspacing(df1, df2, outfile, tolerance=0.0001):
+    """
+    Compare d-spacings between two FCF datasets and find matches.
+    Groups FCF1 reflections by d-spacing to avoid duplicate FCF2 matches.
+    
+    Args:
+        df1: FCF data 1, from parse_reflection_fcf (with columns: h, k, l, f2_calc, f2_meas, d)
+        df2: FCF data 2, from parse_reflection_fcf (with columns: h, k, l, f2_calc, f2_meas, d)
+        outfile: Output file path to save results
+        tolerance: Tolerance for d-spacing matching (default: 0.0001 Å)
+    
+    Returns:
+        results: DataFrame with matched d-spacings and associated data
+    """
+    # Group FCF1 reflections by d-spacing (rounded to handle floating point precision)
+    df1_grouped = df1.groupby(df1['d'].round(6))
+    
+    results = []
+    d_spacing_groups = []
+    
+    for d_spacing, group in df1_grouped:
+        # Get all FCF1 reflections with this d-spacing
+        fcf1_reflections = []
+        for _, row in group.iterrows():
+            fcf1_reflections.append({
+                'h': row['h'], 'k': row['k'], 'l': row['l'],
+                'd': row['d'], 'f2_calc': row['f2_calc'], 'f2_meas': row['f2_meas']
+            })
+        
+        # Find FCF2 matches for this d-spacing (use the first reflection's d-spacing as reference)
+        reference_d = fcf1_reflections[0]['d']
+        fcf2_matches = []
+        
+        for _, row2 in df2.iterrows():
+            if abs(reference_d - row2['d']) <= tolerance:
+                fcf2_matches.append({
+                    'h': row2['h'], 'k': row2['k'], 'l': row2['l'],
+                    'd': row2['d'], 'f2_calc': row2['f2_calc'], 'f2_meas': row2['f2_meas'],
+                    'd_difference': abs(reference_d - row2['d'])
+                })
+        
+        # Sort FCF2 matches by d_difference
+        fcf2_matches.sort(key=lambda x: x['d_difference'])
+        
+        # Store the grouped information
+        d_spacing_groups.append({
+            'fcf1_reflections': fcf1_reflections,
+            'fcf2_matches': fcf2_matches,
+            'd_spacing': reference_d
+        })
+        
+        # Create results entries for individual row tracking (for compatibility)
+        for fcf1_refl in fcf1_reflections:
+            if fcf2_matches:
+                for i, fcf2_match in enumerate(fcf2_matches):
+                    result_entry = {
+                        'df1_h': fcf1_refl['h'],
+                        'df1_k': fcf1_refl['k'],
+                        'df1_l': fcf1_refl['l'],
+                        'df1_d': fcf1_refl['d'],
+                        'df1_f2_meas': fcf1_refl['f2_meas'],
+                        'df1_f2_calc': fcf1_refl['f2_calc'],
+                        'df2_h': fcf2_match['h'],
+                        'df2_k': fcf2_match['k'],
+                        'df2_l': fcf2_match['l'],
+                        'df2_d': fcf2_match['d'],
+                        'df2_f2_calc': fcf2_match['f2_calc'],
+                        'df2_f2_meas': fcf2_match['f2_meas'],
+                        'match_rank': i + 1
+                    }
+                    results.append(result_entry)
+            else:
+                # No matches found
+                result_entry = {
+                    'df1_h': fcf1_refl['h'],
+                    'df1_k': fcf1_refl['k'],
+                    'df1_l': fcf1_refl['l'],
+                    'df1_d': fcf1_refl['d'],
+                    'df1_f2_meas': fcf1_refl['f2_meas'],
+                    'df1_f2_calc': fcf1_refl['f2_calc'],
+                    'df2_h': None,
+                    'df2_k': None,
+                    'df2_l': None,
+                    'df2_d': None,
+                    'df2_f2_calc': None,
+                    'df2_f2_meas': None,
+                    'match_rank': 0
+                }
+                results.append(result_entry)
+    
+    # Convert to DataFrame
+    results_df = pd.DataFrame(results)
+    
+    # Save results to file
+    print(f"\n=== Comparing d-spacing {df1['tag'].iloc[0]} vs {df2['tag'].iloc[0]} with tolerance {tolerance}")
+    with open(outfile, 'w') as f:
+        # Print header and summary
+        f.write("FCF d-spacing Comparison\n")
+        f.write(f"{df1['tag'].iloc[0]} vs {df2['tag'].iloc[0]}\n")
+        f.write("="*80 + "\n")
+        f.write(f"Tolerance used: {tolerance} Å\n")
+        f.write(f"Total reflections in {df1['tag'].iloc[0]}: {len(df1)}\n")
+        f.write(f"Total reflections in {df2['tag'].iloc[0]}: {len(df2)}\n")
+        f.write(f"Unique d-spacing groups in {df1['tag'].iloc[0]}: {len(d_spacing_groups)}\n")
+        f.write(f"d-spacing groups without matches: {len([g for g in d_spacing_groups if not g['fcf2_matches']])}\n")
+        f.write("\n")
+        
+        # Write df1 in tabular format
+        f.write("="*80 + "\n")
+        f.write(f"Dataset 1: {df1['tag'].iloc[0]}\n")
+        f.write("="*80 + "\n")
+        f.write(f"{'(h,k,l)':<12} {'d_spacing':<12} {'F²_calc':<12} {'F²_meas':<12}\n")
+        f.write("-" * 48 + "\n")
+        for _, row in df1.iterrows():
+            hkl = f"({int(row['h'])},{int(row['k'])},{int(row['l'])})"
+            f.write(f"{hkl:<12} {row['d']:<12.4f} {row['f2_calc']:<12.2f} {row['f2_meas']:<12.2f}\n")
+        
+        f.write("\n")
+        
+        # Write df2 in tabular format
+        f.write("="*80 + "\n")
+        f.write(f"Dataset 2: {df2['tag'].iloc[0]}\n")
+        f.write("="*80 + "\n")
+        f.write(f"{'(h,k,l)':<12} {'d_spacing':<12} {'F²_calc':<12} {'F²_meas':<12}\n")
+        f.write("-" * 48 + "\n")
+        for _, row in df2.iterrows():
+            hkl = f"({int(row['h'])},{int(row['k'])},{int(row['l'])})"
+            f.write(f"{hkl:<12} {row['d']:<12.4f} {row['f2_calc']:<12.2f} {row['f2_meas']:<12.2f}\n")
+        
+        f.write("\n")
+        
+        # Write comparison results using grouped format
+        f.write("="*80 + "\n")
+        f.write("FCF d-spacing Comparison Results (Grouped by d-spacing):\n")
+        f.write(f"FCF1:{df1['tag'].iloc[0]}\n")
+        f.write(f"FCF2:{df2['tag'].iloc[0]}\n")
+        f.write("="*80 + "\n")
+        
+        # Process each d-spacing group
+        for group in d_spacing_groups:
+            fcf1_reflections = group['fcf1_reflections']
+            fcf2_matches = group['fcf2_matches']
+            d_spacing = group['d_spacing']
+            
+            # Write d-spacing header
+            f.write(f"\nd-spacing: {d_spacing:.4f} Å\n")
+            f.write("-" * 30 + "\n")
+            
+            # Write FCF1 reflections for this d-spacing
+            f.write("FCF1 reflections:\n")
+            for refl in fcf1_reflections:
+                hkl = f"({int(refl['h'])},{int(refl['k'])},{int(refl['l'])})"
+                f.write(f"  {hkl:<12} F²_calc: {refl['f2_calc']:<8.2f} F²_meas: {refl['f2_meas']:<8.2f}\n")
+            
+            # Write FCF2 matches for this d-spacing
+            if fcf2_matches:
+                f.write("FCF2 matches:\n")
+                for match in fcf2_matches:
+                    hkl = f"({int(match['h'])},{int(match['k'])},{int(match['l'])})"
+                    f.write(f"  {hkl:<12} F²_calc: {match['f2_calc']:<8.2f} F²_meas: {match['f2_meas']:<8.2f}\n")
+            else:
+                f.write("FCF2 matches: None\n")
+            
+            f.write("\n")
+    
+    print(f"FCF d-spacing comparison results saved to: {outfile}")
     
     return results_df
 ##############################

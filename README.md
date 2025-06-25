@@ -9,7 +9,7 @@ This tool provides analysis of crystal structure data by comparing:
 - **Theoretical models** from structure factor calculations (e.g. by VESTA)
 
 Comparisons can be made in
-- **d-spacing** suggested
+- **d-spacing** suggested (To calculate d interactively: `python3 calc_d_spacing.py`)
 - **Miller indices (hkl)** (Multiplcity is not reflected in experimental output, only one set of Miller indices will be returned in CrysAlisPro output.)
 
 
