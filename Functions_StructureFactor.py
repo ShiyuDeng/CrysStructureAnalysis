@@ -182,7 +182,10 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
     results = []
     d_spacing_groups = []
     
-    for d_spacing, group in df1_grouped:
+    # Sort groups by d-spacing in descending order
+    sorted_groups = sorted(df1_grouped, key=lambda x: x[0], reverse=True)
+    
+    for d_spacing, group in sorted_groups:
         # Get all FCF reflections with this d-spacing
         fcf_reflections = []
         for _, row in group.iterrows():
@@ -354,7 +357,10 @@ def compare_fcf_in_dspacing(df1, df2, outfile, tolerance=0.0001):
     results = []
     d_spacing_groups = []
     
-    for d_spacing, group in df1_grouped:
+    # Sort groups by d-spacing in descending order
+    sorted_groups = sorted(df1_grouped, key=lambda x: x[0], reverse=True)
+    
+    for d_spacing, group in sorted_groups:
         # Get all FCF1 reflections with this d-spacing
         fcf1_reflections = []
         for _, row in group.iterrows():
