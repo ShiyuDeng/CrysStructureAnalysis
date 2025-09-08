@@ -26,6 +26,7 @@ Options:
   -compare_vesta_hkl   Compare VESTA HKL files  
   -compare_fcf_vesta   Compare FCF and VESTA HKL
   -compare_d           Compare d-spacing between FCF and VESTA
+  -plot_fcf         Plot F² (calculated) vs F² (observed) for FCF files
   -h, --help           Show this help message and exit
 
 Examples:

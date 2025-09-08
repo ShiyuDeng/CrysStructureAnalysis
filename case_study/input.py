@@ -11,6 +11,7 @@ tag2_fcf='exp.10 GPa, R-3 model, fcf output'
 out_fcf='out_compare_fcf_hkl'
 
 ### if plot fcf
+#max_val=70000
 save1='R3_10GPa_fcf.png'
 save2='Rm3_10GPa_fcf.png'
 title1='10 GPa, x = calc (R3), y = meas (R3)'

@@ -520,15 +520,19 @@ def plot_f2(fc, fo, file_title, outfile):
     matplotlib.use('Agg')  # Use non-interactive backend
     import matplotlib.pyplot as plt
 
-    plt.figure(figsize=(6, 4))
+    plt.figure(figsize=(6, 5))
     plt.scatter(fc, fo, alpha=0.6, edgecolor='k', s=20)
+
     min_val = min(min(fc), min(fo))
-    max_val = max(max(fc), max(fo))
+    max_val = 1.05 * max(max(fc), max(fo))
 
     plt.plot([min_val, max_val], [min_val, max_val], 'r--', label='y = x')
     plt.xlabel(f"F² (calculated)")
     plt.ylabel(f"F² (observed)")
     plt.title(f"{file_title}")
+
+    plt.xlim(0, max_val)
+    plt.ylim(0, max_val)
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
