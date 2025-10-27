@@ -512,19 +512,65 @@ def compare_fcf_in_dspacing(df1, df2, outfile, tolerance=0.0001):
 
 
 ############# PLOTTING FUNCTIONS #############
-def plot_f2(fc, fo, file_title, outfile):
+def plot_f2(fc, fo, file_title, outfile, P=0, weights=None, min_val=None, max_val=None):
     """
     Plots F^2_calc vs F^2_meas.
+    Reference for R factor: http://pd.chem.ucl.ac.uk/pdnn/refine1/rfacs.htm
+    R = Σ|F_o² - F_c²| / ΣF_o²
+    χ² = (Rwp / Rexp)²
     """
     import matplotlib
     matplotlib.use('Agg')  # Use non-interactive backend
     import matplotlib.pyplot as plt
+    import numpy as np
+
+    fc = np.array(fc)
+    fo = np.array(fo)
+
+    # Default weights (equal weighting)
+    if weights is None:
+        weights = np.ones_like(fo)
+    else:
+        weights = np.array(weights, dtype=float)
+
+    # define as a function 
+    N = len(fo)
+
+    # R factor
+    numerator = np.sum(np.abs(fo - fc))
+    denominator = np.sum(np.abs(fo))
+    R_factor = numerator / denominator if denominator != 0 else np.nan
+
+    # --- Rwp, Rexp, χ² ---
+    diff_sq = (np.sqrt(fo) - np.sqrt(fc)) ** 2
+    Rwp = np.sqrt(np.sum(weights * diff_sq) / np.sum(weights * fo))
+    Rexp= np.sqrt((N - P ) / np.sum(weights * fo)) if N > P else np.nan
+    chi2 = (Rwp / Rexp) ** 2 if Rexp != 0 else np.nan
+
+    text_str = (
+        f"$R = {R_factor:.4f}$\n"
+        f"$R_{{wp}} = {Rwp:.4f}$\n"
+        f"$R_{{exp}} = {Rexp:.4f}$\n"
+        f"$\\chi^2 = {chi2:.2f}$"
+    )
+    print(f"For {file_title}:\n{text_str}")
 
     plt.figure(figsize=(6, 5))
     plt.scatter(fc, fo, alpha=0.6, edgecolor='k', s=20)
 
-    min_val = min(min(fc), min(fo))
-    max_val = 1.05 * max(max(fc), max(fo))
+    if min_val is None:
+        min_val = min(min(fc), min(fo))
+    if max_val is None:
+        max_val = 1.05 * max(max(fc), max(fo))
+    # min_val, max_val = 0, 70000
+
+    plt.text(
+        0.05, 0.65, 
+        text_str,
+        transform=plt.gca().transAxes, 
+        fontsize=12, 
+        bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+    )
 
     plt.plot([min_val, max_val], [min_val, max_val], 'r--', label='y = x')
     plt.xlabel(f"F² (calculated)")

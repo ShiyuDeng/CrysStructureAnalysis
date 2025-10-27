@@ -16,7 +16,9 @@ save1='R3_10GPa_fcf.png'
 save2='Rm3_10GPa_fcf.png'
 title1='10 GPa, x = calc (R3), y = meas (R3)'
 title2='10 GPa, x = calc (R-3), y = meas (R-3)'
-
+P=12 # number of parameters in refinement
+# min_val = 0
+# max_val = 20000
 
 ### compare_vesta_hkl
 vesta_file1='015_ST4_FePSe3_P7_10p0_0_15.10.2023_R3_2_StructureFactor_VESTA.txt'

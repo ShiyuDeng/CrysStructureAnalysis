@@ -84,10 +84,10 @@ def main(input_file, compare_fcf=False, plot_fcf=False, compare_vesta_hkl=False,
     if plot_fcf:
         #### future update: all for x,y to be read as inputs, and set title accordingly
         # R3 plot: x = calc (R3), y = meas (R3)
-        plot_f2(df_fcf_r3['f2_calc'], df_fcf_r3['f2_meas'], inp.title1, inp.save1)
+        plot_f2(df_fcf_r3['f2_calc'], df_fcf_r3['f2_meas'], inp.title1, inp.save1, inp.P) # inp.min_val, inp.max_val)
         # R-3 plot: x = calc (R-3), y = meas (R-3)
         # Fixed: should use f2_meas from the same dataset for y-axis
-        plot_f2(df_fcf_rm3['f2_calc'], df_fcf_rm3['f2_meas'], inp.title2, inp.save2)
+        plot_f2(df_fcf_rm3['f2_calc'], df_fcf_rm3['f2_meas'], inp.title2, inp.save2, inp.P)#, inp.min_val, inp.max_val)
         ###################################
 
 if __name__ == '__main__':
