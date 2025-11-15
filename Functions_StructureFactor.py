@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 #### all functions related to structure factor calculations and plotting
 import pandas as pd
+import numpy as np
 
 def calc_d_hexagonal(h, k, l, a, c):
     """Calculates the d-spacing for hexagonal crystal systems.
     1/d**2 = 4/3 * (h**2 + h*k + k**2) + 1**2/c**2
     """
-    import math
     tmp = 4/3 * (h**2 + h*k + k**2)/a**2 + l**2/c**2
-    d = 1/math.sqrt(tmp)
+    d = 1/np.sqrt(tmp)
     return d
 
 ##############  READ files #####################
@@ -18,46 +18,100 @@ def parse_reflection_fcf(filepath, tag, a, c):
     returns a DataFrame with columns:
     h, k, l, f2_calc, f2_meas, d_spacing
     """
+    ### add: local_loop=False
+    # if local_loop:
+    #     REQUIRED_COLUMNS = {
+    #         'h': '_refln_index_h',
+    #         'k': '_refln_index_k',
+    #         'l': '_refln_index_l',
+    #         'f2_calc': '_refln_F_squared_calc',
+    #         'f2_meas': '_refln_F_squared_meas',
+    #         'sigma_f2_meas': '_refln_F_squared_sigma',
+    #     }
+    #     column_indices = {} 
+    #     in_loop_header = False
 
     print(f"Read data from {filepath}:\n")
-
+    in_reflection_block = False
     data = []
+    
     with open(filepath, 'r') as file:
         lines = file.readlines()
-
-        in_reflection_block = False
         for line in lines:
             # Check for the start of the reflection data block
             if line.strip().startswith('_refln_index_h'):
                 in_reflection_block = True
                 continue
-        
-            # Process reflection data lines
+
+            ### for future development and debug: more robust reading ###
+            # if line.strip().startswith('loop_'):
+            #     in_loop_header = True
+            #     in_reflection_block = False
+            #     column_indices = {}
+            
+            #     if in_loop_header:
+            #         # Check if the line is one of the required column tags
+            #         is_column_header = False
+            #         for output_key, tag_name in REQUIRED_COLUMNS.items():
+            #             if line.startswith(tag_name):
+            #                 # The index of the column in the data line is its order in the header list
+            #                 column_indices[output_key] = len(column_indices)
+            #                 is_column_header = True
+            #                 break
+                    
+            #         if not is_column_header:
+            #             if not line or line.startswith('#') or line.startswith('_'):
+            #                 in_loop_header = False
+            #             else:
+            #                 in_loop_header = False
+                        
+            #             # Check the required columns
+            #             if not in_loop_header: # Header reading stopped
+            #                 if len(column_indices) == len(REQUIRED_COLUMNS):
+            #                     in_reflection_block = True
+            #                 else:
+            #                     continue
+                            
             if in_reflection_block:
                 if not line.strip() or line.strip().startswith('#'):
                     continue  # Skip empty lines or comments
                 parts = line.strip().split()
-                if len(parts) == 7:
+
+                if len(parts) >= 6:
                     h, k, l = int(parts[0]), int(parts[1]), int(parts[2])
                     fc = float(parts[3])
                     fo = float(parts[4])
-                    # add a columne of calculated d-spacing based on hkl
-                    d_spacing = calc_d_hexagonal(h, k, l, a, c)
+                    f2_sigma = float(parts[5])
 
-                    data.append({'h': h, 
-                                 'k': k, 
-                                 'l': l, 
-                                 'f2_calc': fc, 
-                                 'f2_meas': fo, 
-                                 'd': d_spacing,
-                                 'tag': tag})
+                    # if local_loop:
+                    #     h = int(parts[column_indices['h']])
+                    #     k = int(parts[column_indices['k']])
+                    #     l = int(parts[column_indices['l']])
+                    #     fc = float(parts[column_indices['f2_calc']])
+                    #     fo = float(parts[column_indices['f2_meas']])
+                    #     f2_sigma = float(parts[column_indices['sigma_f2_meas']])
+
+                    # add a columne of calculated d-spacing based on hkl
+                    d_calc = calc_d_hexagonal(h, k, l, a, c)
+
+                    data.append({
+                        'h': h, 'k': k, 'l': l, 
+                        'f2_calc': fc, 
+                        'f2_meas': fo, 
+                        'sigma_f2_meas': f2_sigma, 
+                        'd_calc': d_calc,
+                        'tag': tag
+                    })
                 else:
-                    print(f"Skipping line due to unexpected format: {line.strip()}")
-                    continue
+                    print(f"WARNING: check line format! {line.strip()}")
+                    exit
 
     df = pd.DataFrame(data)
+    print(f"DEBUG: df read\n{format(df)}")
+
     #sort by d_spacing from largest to smallest
-    df.sort_values(by='d', inplace=True, ascending=False)
+    df.sort_values(by='d_calc', inplace=True, ascending=False)
+    print(f"DEBUG: after sorting by d, df\n{format(df)}")
 
     print(f"Parsed {len(df)} reflections from {filepath}\n")
     if df.empty:
@@ -67,53 +121,51 @@ def parse_reflection_fcf(filepath, tag, a, c):
         print(df)
 
     return df
+########################################################
+
 
 def parse_hkl_vesta(filepath, tag, a, c):
     """
-    Parse VESTA output for 
-    (h, k, l) indices, 
-    d spacing, 
-    Structure factor |F|,
-    Intensity I.
+    Parse VESTA output robustly using column names.
+    Automatically handles header and extracts (h, k, l, |F|, I) by name.
     """
-
-    print(f"Read data from {filepath}:\n")
+    print(f"Reading data from {filepath}...")
     
-    data = []
-    with open(filepath, 'r') as f:
-        for line in f:
-            # Skip header or empty/comment lines
-            if line.strip() == "" or line.startswith("h") or line.startswith("//"):
-                continue
-            parts = line.split()
+    try:
+        df = pd.read_fwf(filepath, sep=r'\s+', header=0)
+    except Exception as e:
+        print(f"Error reading file {filepath}: {e}")
+        return pd.DataFrame()
 
-            if len(parts) == 10:
-                h, k, l = int(parts[0]), int(parts[1]), int(parts[2])
-                d_direct = float(parts[3])
-                StructureFactor = float(parts[6])
-                Intensity = float(parts[8])
-                d_calc = calc_d_hexagonal(h, k, l, a, c)
-
-                data.append({'h': h, 
-                        'k': k, 
-                        'l': l, 
-                        'd_direct': d_direct,
-                        'd_calc': d_calc,
-                        'StructureFactor': StructureFactor,
-                        'Intensity': Intensity,
-                        'tag': tag}) 
-            else:
-                print(f"Skipping line due to unexpected format: {line.strip()}")
-                continue
-
-    df = pd.DataFrame(data)
+    # Rename columns for easy access, handling common variations in VESTA output
+    df.rename(columns={
+        'd (Å)': 'd_direct',
+        '|F|': 'StructureFactor',
+        'I': 'Intensity'
+    }, inplace=True)
     
-    print(f"Parsed {len(df)} reflections from {filepath}\n")
+    # 3. Select and ensure presence of required columns
+    required_cols = ['h', 'k', 'l', 'd_direct', 'StructureFactor', 'Intensity']
+    
+    if not all(col in df.columns for col in required_cols):
+        missing = [col for col in required_cols if col not in df.columns]
+        print(f"Error: File is missing required columns: {missing}. Available columns: {list(df.columns)}")
+        return pd.DataFrame()
+
+    # 4. Filter the DataFrame to include only the required columns
+    df = df[required_cols]
+
+    # 5. Calculate d_calc and add tag
+    # Use pandas vectorization for performance
+    df['d_calc'] = calc_d_hexagonal(df['h'], df['k'], df['l'], a, c)
+    df['tag'] = tag
+
+    print(f"Parsed {len(df)} reflections from {filepath}")
+    
     if df.empty:
-        print("No valid reflections found in the file.")
-        return df
+        print("No valid reflections found after parsing.")
     else:
-        print(df)
+        print(df.head()) # Print the first few rows
 
     return df
 
@@ -542,6 +594,10 @@ def plot_f2(fc, fo, file_title, outfile, P=0, weights=None, min_val=None, max_va
     R_factor = numerator / denominator if denominator != 0 else np.nan
 
     # --- Rwp, Rexp, χ² ---
+    # add filter to avoid negative values under sqrt
+    fo = np.clip(fo, a_min=0, a_max=None)
+    fc = np.clip(fc, a_min=0, a_max=None)   
+
     diff_sq = (np.sqrt(fo) - np.sqrt(fc)) ** 2
     Rwp = np.sqrt(np.sum(weights * diff_sq) / np.sum(weights * fo))
     Rexp= np.sqrt((N - P ) / np.sum(weights * fo)) if N > P else np.nan
@@ -585,3 +641,224 @@ def plot_f2(fc, fo, file_title, outfile, P=0, weights=None, min_val=None, max_va
     plt.savefig(outfile, dpi=300, bbox_inches='tight')
     plt.close()  # Close the figure to free memory
     print(f"Plot saved to: {outfile}")
+
+
+########### HKL general condition for hexagonal cell ########
+def HKL_hexagonal_conditions(h,k,l):
+    """ check if the (h,k,l) meets hexagonal conditions:
+    -h + k + l = 3n, n: integer
+    return True if conditions are met, else False
+    """
+    cond1 = (-h + k + l) % 3 == 0
+    return cond1 
+#############################################################
+
+
+#################      Friedel Pairs analysis  ##############
+def analyze_friedel_pairs(df_in, outfile, condition='None'):
+    """ check the intensity of (h,h,k) vs (-h,-k,-l) pairs in the df_in
+    analysis results in outfile
+    """
+
+    with open(outfile, 'w') as f:
+        f.write("Friedel Pairs Analysis\n")
+        f.write("="*50 + "\n")
+
+        if condition == 'hexagonal':
+            f.write("Applying hexagonal conditions for (h,k,l)")
+            df_filtered = df_in[df_in.apply(lambda row: HKL_hexagonal_conditions(row['h'], row['k'], row['l']), axis=1)]
+        else:
+            df_filtered = df_in
+
+        f.write(f"Total reflections to be analyzed: {len(df_filtered)}\n\n")
+
+        # Create a set to track processed pairs
+        processed_pairs = set()
+
+        for _, row in df_filtered.iterrows():
+            h, k, l = row['h'], row['k'], row['l']
+            friedel_hkl = (-h, -k, -l)
+
+            if (h, k, l) in processed_pairs or friedel_hkl in processed_pairs:
+                continue  # Skip already processed pairs
+
+            # Find the Friedel pair in the DataFrame
+            pair_row = df_filtered[
+                (df_filtered['h'] == friedel_hkl[0]) & 
+                (df_filtered['k'] == friedel_hkl[1]) & 
+                (df_filtered['l'] == friedel_hkl[2])
+            ]
+
+            if not pair_row.empty:
+                f2_meas_1 = row['f2_meas']
+                f2_meas_2 = pair_row.iloc[0]['f2_meas']
+                ratio = f2_meas_1 / f2_meas_2 if f2_meas_2 != 0 else np.nan
+
+                f.write(f"Pair: ({h}, {k}, {l}) and ({friedel_hkl[0]}, {friedel_hkl[1]}, {friedel_hkl[2]})\n")
+                f.write(f"  F²_meas 1: {f2_meas_1:.2f}\n")
+                f.write(f"  F²_meas 2: {f2_meas_2:.2f}\n")
+                f.write(f"  Ratio (1/2): {ratio:.4f}\n\n")
+
+                processed_pairs.add((h, k, l))
+                processed_pairs.add(friedel_hkl)
+
+    print(f"Friedel pair analysis completed. Results saved to {outfile}.")
+    
+################# END - Friedel Pairs analysis ##############
+
+
+def is_primary_pair(row):
+        hkl = row['hkl']
+        inv = (-row['h'], -row['k'], -row['l'])
+        # Exclude self-pair (e.g., origin) where hkl == inv
+        if hkl == inv:
+            return False
+        # Keep only one orientation to avoid double counting
+        return hkl > inv
+
+#################       Friedel Pairs analysis (Statistical)  ##############
+def prepare_friedel_data(df_in, condition='None'):
+    """ 
+    Prepares a clean DataFrame containing one row per Friedel pair, 
+    calculating the observed intensity difference and its statistical significance.
+    """
+    ldebug=False
+
+    if condition == 'hexagonal':
+        print("Applying hexagonal conditions for (h,k,l)")
+        df_filtered = df_in[df_in.apply(lambda row: HKL_hexagonal_conditions(row['h'], row['k'], row['l']), axis=1)].copy()
+    else:
+        df_filtered = df_in.copy() 
+
+    # 1. Create the HKL key for matching
+    df_filtered['hkl'] = df_filtered.apply(lambda row: (row['h'], row['k'], row['l']), axis=1)
+    df_filtered['hkl_inv'] = df_filtered.apply(lambda row: (-row['h'], -row['k'], -row['l']), axis=1)
+
+    # 2. Rename columns for reflection 1 (hkl)
+    df1 = df_filtered[['hkl', 'h', 'k', 'l', 'f2_meas', 'sigma_f2_meas']].rename(
+        columns={'f2_meas': 'I_obs_hkl', 'sigma_f2_meas': 'sigma_hkl'}
+    )
+    
+    # 3. Rename columns for reflection 2 (hkl_inv)
+    df2 = df_filtered[['hkl_inv', 'f2_meas', 'sigma_f2_meas']].rename(
+        columns={'hkl_inv': 'hkl', 'f2_meas': 'I_obs_hkl_inv', 'sigma_f2_meas': 'sigma_hkl_inv'}
+    )
+
+    # 4. Merge to pair up the reflections
+    # The merge is performed on the primary hkl index and the inverted hkl_inv index
+    # We only keep pairs where (hkl) is lexicographically smaller than (-h -k -l) 
+    # to ensure each pair is counted only once.
+    df_merged = pd.merge(
+        df1, 
+        df2, 
+        on='hkl', 
+        how='inner'
+    )
+    if ldebug:
+        print(df_merged.head())
+
+    df_pairs = df_merged[df_merged.apply(is_primary_pair, axis=1)].copy()
+    
+    # 5. Calculate Statistical Metrics
+    df_pairs['Delta_I_obs'] = df_pairs['I_obs_hkl'] - df_pairs['I_obs_hkl_inv']
+    
+    # Statistical Significance (e.s.d. of the difference)
+    # sigma(Delta I) = sqrt( sigma(I_hkl)^2 + sigma(I_inv)^2 )
+    df_pairs['sigma_Delta_I_obs'] = np.sqrt(
+        df_pairs['sigma_hkl']**2 + df_pairs['sigma_hkl_inv']**2
+    )
+    
+    # Z-score (Statistical Significance)
+    # This is the number of standard deviations the difference is away from zero.
+    df_pairs['Z_score'] = df_pairs['Delta_I_obs'] / df_pairs['sigma_Delta_I_obs']
+    
+    print(f"Total unique Friedel pairs found: {len(df_pairs)}")
+    
+    return df_pairs[['h', 'k', 'l', 'I_obs_hkl', 'I_obs_hkl_inv', 
+                     'sigma_hkl', 'sigma_hkl_inv', 'Delta_I_obs', 
+                     'sigma_Delta_I_obs', 'Z_score']]
+
+################# END - Friedel Pairs analysis (Statistical) ##############
+
+
+##########################  PLOT  #################################
+def plot_friedel_analysis(df_pairs, output_dir='./friedel_plots'):
+    """
+    Generates the two critical plots for proving broken inversion symmetry:
+    1. I(hkl) vs I(-h-k-l) Scatter Plot - deviation from y=x line indicates non-centrosymmetry.
+    2. Distribution of Statistical Significance (Z-score)：
+    - show a distribution significantly wider and/or less centered than the expected Gaussian, proving the deviations are physical, not noise.
+    """
+    import os
+    import matplotlib.pyplot as plt
+    from scipy.stats import norm
+
+    try:
+        import seaborn as sns
+    except Exception:
+        sns = None
+
+    # Set plotting style for professional look
+    plt.style.use('seaborn-v0_8-whitegrid')
+    sns.set_context("talk")
+    plt.rcParams['figure.figsize'] = (10,8)
+    plt.rcParams['font.sans-serif'] = ['Inter', 'Arial', 'DejaVu Sans']
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # --- PLOT 1: I(hkl) vs I(-h-k-l) Scatter Plot (Plot 2) ---
+    fig, ax = plt.subplots()
+    
+    # Use a log scale as intensities span several orders of magnitude
+    ax.scatter(df_pairs['I_obs_hkl'], df_pairs['I_obs_hkl_inv'], 
+               s=20, alpha=0.8, edgecolors='none', color="#0032f9") 
+    
+    # Plot the y=x line (Centrosymmetric condition)
+    I_max = max(df_pairs['I_obs_hkl'].max(), df_pairs['I_obs_hkl_inv'].max()) * 1.05
+    ax.plot([0, I_max], [0, I_max], 'r-.', alpha=0.50,
+            label=r'$I(hkl) = I(\bar{h}\bar{k}\bar{l})$'
+            )
+    
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    
+    ax.set_xlabel(r'$I_{\text{obs}}(hkl)$ [a.u.]')
+    ax.set_ylabel(r'$I_{\text{obs}}(\bar{h}\bar{k}\bar{l})$ [a.u.]')
+    ax.set_title('Observed Friedel Pair Intensities (Scatter)')
+    ax.legend(loc='upper left')
+    ax.axis('square')
+    
+    plot1_path = os.path.join(output_dir, 'Intensity_Pairs.png')
+    fig.savefig(plot1_path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    print(f"Plot 1 saved to {plot1_path}')")
+    
+    # --- PLOT 2: Distribution of Statistical Significance (Z-score) (Plot 3) ---
+    fig, ax = plt.subplots()
+    df_valid = df_pairs.dropna(subset=['Z_score'])
+    
+    # Plot the histogram of the Z-score
+    if (sns is not None):
+        sns.histplot(df_valid['Z_score'], bins=50, kde=True, ax=ax, color='#ff7f0e')
+    else:
+        ax.hist(df_valid['Z_score'].values, bins=50, color='#ff7f0e', alpha=0.8)
+    
+    # Add the expected normal distribution for reference (Centrosymmetric, random noise, Gaussian)
+    xmin, xmax = ax.get_xlim()
+    x = np.linspace(xmin, xmax, 100)
+    gaussian_pdf = norm.pdf(x, 0, 1)
+    scale_factor = ax.get_ylim()[1] / gaussian_pdf.max()
+    ax.plot(x, gaussian_pdf * scale_factor * 0.9, 'k--', linewidth=1.5, 
+            label='Expected Noise (Gaussian, $\sigma$=1)')
+    
+    ax.set_xlabel(r'$Z_{\text{obs}} = \frac{\Delta I_{\text{obs}}}{\sigma(\Delta I_{\text{obs}})}$')
+    ax.set_ylabel('Count (Number of Friedel Pairs)')
+    ax.set_title('Statistical Significance of Anomalous Signal')
+    ax.legend(loc='upper right')
+    
+    plot2_path = os.path.join(output_dir, 'Z_score_distribution.png')
+    fig.savefig(plot2_path, dpi=600, bbox_inches='tight')
+    plt.close(fig)
+    print(f"Plot 2 saved to {plot2_path}') # ")
+
