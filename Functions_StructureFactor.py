@@ -12,12 +12,129 @@ def calc_d_hexagonal(h, k, l, a, c):
     return d
 
 ##############  READ files #####################
+def parse_reflection_hkl(filepath, tag, a=None, c=None):
+    """
+    Parses the SHELX HKL file format from CrysAlisPro (.hkl)
+    Format: h k l F² sigma (5 columns)
+    Cell parameters are at the end of the file in CELL line.
+
+    If a and c are not provided, they will be extracted from the file.
+
+    Returns a DataFrame with columns:
+    h, k, l, f2_meas, sigma_f2_meas, d_calc, tag
+
+    Note: HKL files don't contain F²_calc, only measured values.
+    """
+    ldebug = False
+    print(f"Read HKL data from {filepath}:\n")
+
+    data = []
+    cell_params = {}
+
+    with open(filepath, 'r') as file:
+        lines = file.readlines()
+
+    # First pass: extract cell parameters from CELL line if a,c not provided
+    if a is None or c is None:
+        for line in lines:
+            if line.strip().startswith('CELL'):
+                # CELL wavelength a b c alpha beta gamma
+                parts = line.strip().split()
+                if len(parts) >= 7:
+                    cell_params['wavelength'] = float(parts[1])
+                    cell_params['a'] = float(parts[2])
+                    cell_params['b'] = float(parts[3])
+                    cell_params['c'] = float(parts[4])
+                    cell_params['alpha'] = float(parts[5])
+                    cell_params['beta'] = float(parts[6])
+                    cell_params['gamma'] = float(parts[7])
+                    print(f"Extracted cell parameters from file:")
+                    print(f"  a={cell_params['a']:.4f}, b={cell_params['b']:.4f}, c={cell_params['c']:.4f}")
+                    print(f"  alpha={cell_params['alpha']:.2f}, beta={cell_params['beta']:.2f}, gamma={cell_params['gamma']:.2f}")
+                    if a is None:
+                        a = cell_params['a']
+                    if c is None:
+                        c = cell_params['c']
+                break
+
+    if a is None or c is None:
+        print("ERROR: Could not determine cell parameters. Please provide a and c.")
+        return pd.DataFrame()
+
+    # Second pass: read reflection data
+    for line in lines:
+        line_stripped = line.strip()
+
+        # Skip empty lines
+        if not line_stripped:
+            continue
+
+        # Skip SHELX command lines (start with letters)
+        if line_stripped[0].isalpha():
+            continue
+
+        # Skip comment lines
+        if line_stripped.startswith('#'):
+            continue
+
+        parts = line_stripped.split()
+
+        # HKL data lines have 5 numeric columns: h k l F² sigma
+        if len(parts) >= 5:
+            try:
+                h = int(parts[0])
+                k = int(parts[1])
+                l = int(parts[2])
+                f2 = float(parts[3])
+                sigma = float(parts[4])
+
+                # Skip the origin reflection (0,0,0)
+                if h == 0 and k == 0 and l == 0:
+                    continue
+
+                # Calculate d-spacing
+                d_calc = calc_d_hexagonal(h, k, l, a, c)
+
+                data.append({
+                    'h': h, 'k': k, 'l': l,
+                    'f2_meas': f2,
+                    'sigma_f2_meas': sigma,
+                    'd_calc': d_calc,
+                    'tag': tag
+                })
+            except (ValueError, IndexError):
+                # Not a valid data line, skip it
+                if ldebug:
+                    print(f"DEBUG: Skipping line: {line_stripped}")
+                continue
+
+    df = pd.DataFrame(data)
+    if ldebug:
+        print(f"DEBUG: df read\n{format(df)}")
+
+    # Sort by d_spacing from largest to smallest
+    if not df.empty:
+        df.sort_values(by='d_calc', inplace=True, ascending=False)
+
+    if ldebug:
+        print(f"DEBUG: after sorting by d, df\n{format(df)}")
+
+    print(f"Parsed {len(df)} reflections from {filepath}\n")
+    if df.empty:
+        print("No valid reflections found in the file.")
+    else:
+        print(df)
+
+    return df
+
+
 def parse_reflection_fcf(filepath, tag, a, c):
     """
     Parses the reflection output from CrysAlisPro (.fcf) 
     returns a DataFrame with columns:
     h, k, l, f2_calc, f2_meas, d_spacing
     """
+    ldebug=False
     ### add: local_loop=False
     # if local_loop:
     #     REQUIRED_COLUMNS = {
@@ -107,11 +224,13 @@ def parse_reflection_fcf(filepath, tag, a, c):
                     exit
 
     df = pd.DataFrame(data)
-    print(f"DEBUG: df read\n{format(df)}")
+    if ldebug:
+        print(f"DEBUG: df read\n{format(df)}")
 
     #sort by d_spacing from largest to smallest
     df.sort_values(by='d_calc', inplace=True, ascending=False)
-    print(f"DEBUG: after sorting by d, df\n{format(df)}")
+    if ldebug: 
+        print(f"DEBUG: after sorting by d, df\n{format(df)}")
 
     print(f"Parsed {len(df)} reflections from {filepath}\n")
     if df.empty:
@@ -229,7 +348,7 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
         results: DataFrame with matched d-spacings and associated data
     """
     # Group FCF reflections by d-spacing (rounded to handle floating point precision)
-    df1_grouped = df1.groupby(df1['d'].round(6))
+    df1_grouped = df1.groupby(df1['d_calc'].round(6))
     
     results = []
     d_spacing_groups = []
@@ -243,11 +362,11 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
         for _, row in group.iterrows():
             fcf_reflections.append({
                 'h': row['h'], 'k': row['k'], 'l': row['l'],
-                'd': row['d'], 'f2_calc': row['f2_calc'], 'f2_meas': row['f2_meas']
+                'd_calc': row['d_calc'], 'f2_calc': row['f2_calc'], 'f2_meas': row['f2_meas']
             })
         
         # Find VESTA matches for this d-spacing (use the first reflection's d-spacing as reference)
-        reference_d = fcf_reflections[0]['d']
+        reference_d = fcf_reflections[0]['d_calc']
         vesta_matches = []
         
         for _, row2 in df2.iterrows():
@@ -276,7 +395,7 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
                         'df1_h': fcf_refl['h'],
                         'df1_k': fcf_refl['k'],
                         'df1_l': fcf_refl['l'],
-                        'df1_d': fcf_refl['d'],
+                        'df1_d': fcf_refl['d_calc'],
                         'df1_f2_meas': fcf_refl['f2_meas'],
                         'df1_f2_calc': fcf_refl['f2_calc'],
                         'df2_h': vesta_match['h'],
@@ -294,7 +413,7 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
                     'df1_h': fcf_refl['h'],
                     'df1_k': fcf_refl['k'],
                     'df1_l': fcf_refl['l'],
-                    'df1_d': fcf_refl['d'],
+                    'df1_d': fcf_refl['d_calc'],
                     'df1_f2_meas': fcf_refl['f2_meas'],
                     'df1_f2_calc': fcf_refl['f2_calc'],
                     'df2_h': None,
@@ -332,7 +451,7 @@ def compare_d_spacing(df1, df2, outfile, tolerance=0.0001):
         f.write("-" * 48 + "\n")
         for _, row in df1.iterrows():
             hkl = f"({int(row['h'])},{int(row['k'])},{int(row['l'])})"
-            f.write(f"{hkl:<12} {row['d']:<12.4f} {row['f2_calc']:<12.2f} {row['f2_meas']:<12.2f}\n")
+            f.write(f"{hkl:<12} {row['d_calc']:<12.4f} {row['f2_calc']:<12.2f} {row['f2_meas']:<12.2f}\n")
         
         f.write("\n")
         
@@ -639,7 +758,7 @@ def plot_f2(fc, fo, file_title, outfile, P=0, weights=None, min_val=None, max_va
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(outfile, dpi=300, bbox_inches='tight')
-    plt.close()  # Close the figure to free memory
+    plt.close()
     print(f"Plot saved to: {outfile}")
 
 
@@ -703,7 +822,15 @@ def analyze_friedel_pairs(df_in, outfile, condition='None'):
                 processed_pairs.add(friedel_hkl)
 
     print(f"Friedel pair analysis completed. Results saved to {outfile}.")
-    
+
+    ### print out the top 10 largest deviations
+    df_friedel = prepare_friedel_data(df_in, condition=condition)
+    df_friedel['Abs_Delta_I_obs'] = df_friedel['Delta_I_obs'].abs()
+    df_friedel_sorted = df_friedel.sort_values(by='Abs_Delta_I_obs', ascending=False)
+    print("\nTop 10 Friedel pairs with largest intensity differences:")
+    print(df_friedel_sorted[['h', 'k', 'l', 'I_obs_hkl', 'I_obs_hkl_inv', 'Delta_I_obs', 'Z_score']].head(10))  
+
+        
 ################# END - Friedel Pairs analysis ##############
 
 
@@ -782,12 +909,17 @@ def prepare_friedel_data(df_in, condition='None'):
 
 
 ##########################  PLOT  #################################
-def plot_friedel_analysis(df_pairs, output_dir='./friedel_plots'):
+def plot_friedel_analysis(df_pairs, output_dir='./friedel_plots', label=None):
     """
     Generates the two critical plots for proving broken inversion symmetry:
     1. I(hkl) vs I(-h-k-l) Scatter Plot - deviation from y=x line indicates non-centrosymmetry.
     2. Distribution of Statistical Significance (Z-score)：
     - show a distribution significantly wider and/or less centered than the expected Gaussian, proving the deviations are physical, not noise.
+
+    Args:
+        df_pairs: DataFrame with Friedel pair data
+        output_dir: Directory to save plots (default: './friedel_plots')
+        label: Optional prefix for output filenames (e.g., '012_FePSe3' -> '012_FePSe3_Intensity_Pairs.png')
     """
     import os
     import matplotlib.pyplot as plt
@@ -798,67 +930,83 @@ def plot_friedel_analysis(df_pairs, output_dir='./friedel_plots'):
     except Exception:
         sns = None
 
-    # Set plotting style for professional look
-    plt.style.use('seaborn-v0_8-whitegrid')
-    sns.set_context("talk")
-    plt.rcParams['figure.figsize'] = (10,8)
-    plt.rcParams['font.sans-serif'] = ['Inter', 'Arial', 'DejaVu Sans']
-
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
-    # --- PLOT 1: I(hkl) vs I(-h-k-l) Scatter Plot (Plot 2) ---
-    fig, ax = plt.subplots()
     
-    # Use a log scale as intensities span several orders of magnitude
+    # set fontsize for both plots
+    plt.rcParams.update({'font.size': 14})
+
+    # --- PLOT 1: I(hkl) vs I(-h-k-l) Scatter Plot ---
+    fig, ax = plt.subplots(figsize=(8,6))
+    # Raw data in scatter plot (log scale)
     ax.scatter(df_pairs['I_obs_hkl'], df_pairs['I_obs_hkl_inv'], 
-               s=20, alpha=0.8, edgecolors='none', color="#0032f9") 
+               marker='x', s=20, alpha=0.8, color="#0032f9") 
     
     # Plot the y=x line (Centrosymmetric condition)
-    I_max = max(df_pairs['I_obs_hkl'].max(), df_pairs['I_obs_hkl_inv'].max()) * 1.05
-    ax.plot([0, I_max], [0, I_max], 'r-.', alpha=0.50,
-            label=r'$I(hkl) = I(\bar{h}\bar{k}\bar{l})$'
-            )
+    I_max = 2 * max(df_pairs['I_obs_hkl'].max(), df_pairs['I_obs_hkl_inv'].max())
+    ax.plot([0, I_max], [0, I_max], 'r--', alpha=0.50,
+            label=r'$I(hkl) = I(\bar{h}\bar{k}\bar{l})$')
+    ax.set_xlim(1, I_max)
+    ax.set_ylim(1, I_max)
     
     ax.set_xscale('log')
     ax.set_yscale('log')
     
     ax.set_xlabel(r'$I_{\text{obs}}(hkl)$ [a.u.]')
     ax.set_ylabel(r'$I_{\text{obs}}(\bar{h}\bar{k}\bar{l})$ [a.u.]')
-    ax.set_title('Observed Friedel Pair Intensities (Scatter)')
+    if label:
+        ax.set_title(f'{label}\nObserved Friedel Pair Intensities')
+    else:
+        ax.set_title('Observed Friedel Pair Intensities')
     ax.legend(loc='upper left')
-    ax.axis('square')
+    ax.set_aspect('equal', adjustable='box')
     
-    plot1_path = os.path.join(output_dir, 'Intensity_Pairs.png')
-    fig.savefig(plot1_path, dpi=300, bbox_inches='tight')
+    # Construct filename with optional label prefix
+    if label:
+        plot1_name = f'{label}_Intensity_Pairs.png'
+    else:
+        plot1_name = 'Intensity_Pairs.png'
+    plot1_path = os.path.join(output_dir, plot1_name)
+    fig.savefig(plot1_path, dpi=600, bbox_inches='tight')
     plt.close(fig)
-    print(f"Plot 1 saved to {plot1_path}')")
+    print(f"Plot 1 saved to {plot1_path}")
     
-    # --- PLOT 2: Distribution of Statistical Significance (Z-score) (Plot 3) ---
-    fig, ax = plt.subplots()
+    # --- PLOT 2: Distribution of Statistical Significance (Z-score) ---
+    fig, ax = plt.subplots(figsize=(8,6))
     df_valid = df_pairs.dropna(subset=['Z_score'])
     
     # Plot the histogram of the Z-score
     if (sns is not None):
-        sns.histplot(df_valid['Z_score'], bins=50, kde=True, ax=ax, color='#ff7f0e')
+        sns.histplot(df_valid['Z_score'], bins=60, kde=True, ax=ax, color='#ff7f0e')
     else:
-        ax.hist(df_valid['Z_score'].values, bins=50, color='#ff7f0e', alpha=0.8)
+        ax.hist(df_valid['Z_score'].values, bins=60, color='#ff7f0e', alpha=0.8)
     
     # Add the expected normal distribution for reference (Centrosymmetric, random noise, Gaussian)
     xmin, xmax = ax.get_xlim()
-    x = np.linspace(xmin, xmax, 100)
+    x = np.linspace(xmin, xmax, 200)
     gaussian_pdf = norm.pdf(x, 0, 1)
     scale_factor = ax.get_ylim()[1] / gaussian_pdf.max()
-    ax.plot(x, gaussian_pdf * scale_factor * 0.9, 'k--', linewidth=1.5, 
-            label='Expected Noise (Gaussian, $\sigma$=1)')
+    ax.plot(x, gaussian_pdf * scale_factor * 0.9, 'k--', linewidth=1.25, 
+            label='Expected Noise\n(Gaussian, $\sigma$=1)')
     
+    bound=max(abs(xmin), abs(xmax))
+    ax.set_xlim(-bound, bound)
+
     ax.set_xlabel(r'$Z_{\text{obs}} = \frac{\Delta I_{\text{obs}}}{\sigma(\Delta I_{\text{obs}})}$')
     ax.set_ylabel('Count (Number of Friedel Pairs)')
-    ax.set_title('Statistical Significance of Anomalous Signal')
+    if label:
+        ax.set_title(f'{label}\nStatistical Significance of Anomalous Signal')
+    else:
+        ax.set_title('Statistical Significance of Anomalous Signal')
     ax.legend(loc='upper right')
-    
-    plot2_path = os.path.join(output_dir, 'Z_score_distribution.png')
+
+    # Construct filename with optional label prefix
+    if label:
+        plot2_name = f'{label}_Z_score_distribution.png'
+    else:
+        plot2_name = 'Z_score_distribution.png'
+    plot2_path = os.path.join(output_dir, plot2_name)
     fig.savefig(plot2_path, dpi=600, bbox_inches='tight')
     plt.close(fig)
-    print(f"Plot 2 saved to {plot2_path}') # ")
+    print(f"Plot 2 saved to {plot2_path}")
 
